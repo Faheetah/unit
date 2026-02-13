@@ -1,3 +1,3 @@
 defmodule Unit.Pound do
-  defstruct [:value, singular: "pound", plural: "pounds", alias: "lb", type: Unit.Weight, ml: 453.59237]
+  defstruct [:value, singular: "pound", plural: "pounds", alias: "lb", type: Unit.Weight, mg: 453592.37]
 end

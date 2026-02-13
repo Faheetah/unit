@@ -1,7 +1,7 @@
 defmodule Unit.Volume do
   def convert(amount, to) do
     new = struct(to)
-    Map.put(new, :value, amount.value / amount.ml * struct(to).ml)
+    Map.put(new, :value, Float.round(amount.value * amount.ml / struct(to).ml, 4))
   end
 
   def add(left, right) do
