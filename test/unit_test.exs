@@ -48,6 +48,16 @@ defmodule UnitTest do
       assert result.mg == 1000000.0
     end
 
+    test "converts to milligram units correctly" do
+      result = Unit.convert(%Unit.Gram{value: 1}, Unit.Milligram)
+      assert %Unit.Milligram{value: 1000.0} = result
+      assert result.singular == "milligram"
+      assert result.plural == "milligrams"
+      assert result.alias == "mg"
+      assert result.type == Unit.Weight
+      assert result.mg == 1.0
+    end
+
     test "converts volume units correctly" do
       result = Unit.convert(%Unit.Cup{value: 1}, Unit.Tablespoon)
       assert %Unit.Tablespoon{} = result

@@ -111,6 +111,7 @@ result = Unit.convert(%Unit.Gram{value: 1000}, Unit.Cup)
 |------|--------|-------|---------------------|
 | Ounce | `Unit.Ounce` | oz | 28349.5231 |
 | Gram | `Unit.Gram` | g | 1000.0 |
+| Milligram | `Unit.Milligram` | mg | 1.0 |
 | Pound | `Unit.Pound` | lb | 453592.37 |
 | Kilogram | `Unit.Kilogram` | kg | 1000000.0 |
 

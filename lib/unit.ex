@@ -39,7 +39,7 @@ defmodule Unit do
       %Unit.Kilogram{value: 1.0, singular: "kilogram", plural: "kilograms", alias: "kg", type: Unit.Weight, mg: 1000000.0}
 
       iex> Unit.convert(%Unit.Cup{value: 1}, Unit.Tablespoon)
-      %Unit.Tablespoon{value: 15.999999932371955, singular: "tablespoon", plural: "tablespoons", alias: "tbsp", type: Unit.Volume, ml: 14.78676484375}
+      %Unit.Tablespoon{value: 16.0, singular: "tablespoon", plural: "tablespoons", alias: "tbsp", type: Unit.Volume, ml: 14.78676484375}
 
       iex> Unit.convert(%Unit.Gram{value: 1000}, Unit.Cup)
       {:error, "Cannot convert units of different types: Elixir.Unit.Weight and Elixir.Unit.Volume"}
