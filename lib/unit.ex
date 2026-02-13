@@ -15,7 +15,7 @@ defmodule Unit do
       %Unit.Cup{value: 2.0, singular: "cup", plural: "cups", alias: "c", type: Unit.Volume, ml: 236.5882365}
 
       iex> Unit.add(%Unit.Gram{value: 1000}, %Unit.Cup{value: 1})
-      {:error, "Cannot add units of different types: weight and volume"}
+      {:error, "Cannot add units of different types: Elixir.Unit.Weight and Elixir.Unit.Volume"}
 
   """
   def add(%{type: type1} = left, %{type: type2} = right) when type1 == type2 do
