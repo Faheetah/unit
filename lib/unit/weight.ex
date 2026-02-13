@@ -5,7 +5,7 @@ defmodule Unit.Weight do
   end
 
   def add(left, right) do
-    Map.put(left, :value, left.value + (right.value * right.ml / left.ml))
+    Map.put(left, :value, Float.round(left.value + (right.value * right.ml / left.ml), 4))
   end
 
   def subtract(left, right) do
