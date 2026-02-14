@@ -4,14 +4,16 @@ defmodule Unit do
   """
 
   # List of all known unit modules for parsing
-  @units [
+  @weight [
     # Weight units
     Unit.Gram,
     Unit.Kilogram,
     Unit.Milligram,
     Unit.Ounce,
-    Unit.Pound,
+    Unit.Pound
+  ]
 
+  @volume [
     # Volume units
     Unit.Teaspoon,
     Unit.Tablespoon,
@@ -21,6 +23,17 @@ defmodule Unit do
     Unit.Quart,
     Unit.Gallon
   ]
+
+  @temperature [
+    # Temperature units
+    Unit.Celsius,
+    Unit.Fahrenheit,
+    Unit.Kelvin
+  ]
+
+  def parse_weight(string), do: parse(string, @weight)
+  def parse_volume(string), do: parse(string, @volume)
+  def parse_temperature(string), do: parse(string, @temperature)
 
   @doc """
   Parses a unit from a string. Takes the first occurrence of a unit in the string.
@@ -49,11 +62,11 @@ defmodule Unit do
       {:error, "No units here"}
 
   """
-  def parse(string) do
+  def parse(string, units) do
     # Try to parse as a fraction first
     case parse_fraction(string) do
       {numerator, denominator, rest} ->
-        find_unit({(numerator / denominator), rest}, string)
+        find_unit({(numerator / denominator), rest}, string, units)
       _ ->
         # If not a fraction, try parsing as a float
         # First trim leading spaces
@@ -61,7 +74,7 @@ defmodule Unit do
         trimmed_string
         |> Float.parse()
         |> parse_fragments(trimmed_string)
-        |> find_unit(string)
+        |> find_unit(string, units)
     end
   end
 
@@ -102,11 +115,16 @@ defmodule Unit do
     end
   end
 
-  def find_unit({:error, _rest}, string), do: {:error, string}
-  def find_unit({amount, rest}, string) do
+  def find_unit({:error, _rest}, string, _units), do: {:error, string}
+  def find_unit({amount, rest}, string, units) do
     [unit | rest2] = String.split(rest, " ")
     unit = String.downcase(unit)
-    module = Enum.find(@units, fn u -> unit in [u.__struct__().singular, u.__struct__().plural, u.__struct__().alias] end)
+    module = Enum.find(units, fn u ->
+      singular = String.downcase(u.__struct__().singular)
+      plural = String.downcase(u.__struct__().plural)
+      alias_val = String.downcase(u.__struct__().alias)
+      unit in [singular, plural, alias_val]
+    end)
 
     if module do
       {struct(module, value: amount), Enum.join(rest2, " ")}

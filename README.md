@@ -38,6 +38,9 @@ weight = %Unit.Gram{value: 1000}
 
 # Create a volume measurement
 volume = %Unit.Cup{value: 2.5}
+
+# Create a temperature measurement
+temperature = %Unit.Celsius{value: 25}
 ```
 
 ### Adding Units
@@ -89,6 +92,16 @@ result = Unit.convert(%Unit.Cup{value: 1}, Unit.Tablespoon)
 # Attempting to convert units of different types will return an error
 result = Unit.convert(%Unit.Gram{value: 1000}, Unit.Cup)
 # Returns: {:error, "Cannot convert units of different types: Elixir.Unit.Weight and Elixir.Unit.Volume"}
+
+# Convert temperature units
+result = Unit.convert(%Unit.Celsius{value: 0}, Unit.Fahrenheit)
+# Returns: %Unit.Fahrenheit{value: 32.0, ...}
+
+result = Unit.convert(%Unit.Fahrenheit{value: 32}, Unit.Celsius)
+# Returns: %Unit.Celsius{value: 0.0, ...}
+
+result = Unit.convert(%Unit.Celsius{value: 25}, Unit.Kelvin)
+# Returns: %Unit.Kelvin{value: 298.15, ...}
 ```
 
 ### Subtracting Units
@@ -175,4 +188,12 @@ result = Unit.to_string(%Unit.Cup{value: 3})
 | Milligram | `Unit.Milligram` | mg | 1.0 |
 | Pound | `Unit.Pound` | lb | 453592.37 |
 | Kilogram | `Unit.Kilogram` | kg | 1000000.0 |
+
+### Temperature Units
+
+| Unit | Module | Alias | Notes |
+|------|--------|-------|-------|
+| Celsius | `Unit.Celsius` | c | |
+| Fahrenheit | `Unit.Fahrenheit` | f | |
+| Kelvin | `Unit.Kelvin` | k | |
 

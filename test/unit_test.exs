@@ -183,6 +183,119 @@ defmodule UnitTest do
     end
   end
 
+  describe "temperature conversions" do
+    test "converts between Celsius and Fahrenheit correctly" do
+      # Celsius to Fahrenheit
+      result = Unit.convert(%Unit.Celsius{value: 0}, Unit.Fahrenheit)
+      assert %Unit.Fahrenheit{} = result
+      assert abs(result.value - 32.0) < 0.0001
+
+      result = Unit.convert(%Unit.Fahrenheit{value: 32}, Unit.Celsius)
+      assert %Unit.Celsius{} = result
+      assert abs(result.value - 0.0) < 0.0001
+
+      # Boiling point
+      result = Unit.convert(%Unit.Celsius{value: 100}, Unit.Fahrenheit)
+      assert %Unit.Fahrenheit{} = result
+      assert abs(result.value - 212.0) < 0.0001
+
+      result = Unit.convert(%Unit.Fahrenheit{value: 212}, Unit.Celsius)
+      assert %Unit.Celsius{} = result
+      assert abs(result.value - 100.0) < 0.0001
+    end
+
+    test "converts between Celsius and Kelvin correctly" do
+      # Celsius to Kelvin
+      result = Unit.convert(%Unit.Celsius{value: 0}, Unit.Kelvin)
+      assert %Unit.Kelvin{} = result
+      assert abs(result.value - 273.15) < 0.0001
+
+      # Kelvin to Celsius
+      result = Unit.convert(%Unit.Kelvin{value: 273.15}, Unit.Celsius)
+      assert %Unit.Celsius{} = result
+      assert abs(result.value - 0.0) < 0.0001
+
+      # Room temperature
+      result = Unit.convert(%Unit.Celsius{value: 25}, Unit.Kelvin)
+      assert %Unit.Kelvin{} = result
+      assert abs(result.value - 298.15) < 0.0001
+
+      result = Unit.convert(%Unit.Kelvin{value: 298.15}, Unit.Celsius)
+      assert %Unit.Celsius{} = result
+      assert abs(result.value - 25.0) < 0.0001
+    end
+
+    test "converts between Fahrenheit and Kelvin correctly" do
+      # Fahrenheit to Kelvin
+      result = Unit.convert(%Unit.Fahrenheit{value: 32}, Unit.Kelvin)
+      assert %Unit.Kelvin{} = result
+      assert abs(result.value - 273.15) < 0.0001
+
+      # Kelvin to Fahrenheit
+      result = Unit.convert(%Unit.Kelvin{value: 273.15}, Unit.Fahrenheit)
+      assert %Unit.Fahrenheit{} = result
+      assert abs(result.value - 32.0) < 0.0001
+    end
+
+    test "returns error when converting temperature to other unit types" do
+      result = Unit.convert(%Unit.Celsius{value: 25}, Unit.Gram)
+      assert {:error, "Cannot convert units of different types: Elixir.Unit.Temperature and Elixir.Unit.Weight"} = result
+
+      result = Unit.convert(%Unit.Gram{value: 1000}, Unit.Celsius)
+      assert {:error, "Cannot convert units of different types: Elixir.Unit.Weight and Elixir.Unit.Temperature"} = result
+    end
+  end
+
+  describe "temperature arithmetic" do
+    test "adds temperature units correctly" do
+      result = Unit.add(%Unit.Celsius{value: 20}, %Unit.Celsius{value: 5})
+      assert %Unit.Celsius{value: 25.0} = result
+
+      result = Unit.add(%Unit.Fahrenheit{value: 68}, %Unit.Fahrenheit{value: 10})
+      assert %Unit.Fahrenheit{value: 78.0} = result
+    end
+
+    test "subtracts temperature units correctly" do
+      result = Unit.subtract(%Unit.Celsius{value: 25}, %Unit.Celsius{value: 5})
+      assert %Unit.Celsius{value: 20.0} = result
+
+      result = Unit.subtract(%Unit.Fahrenheit{value: 78}, %Unit.Fahrenheit{value: 10})
+      assert %Unit.Fahrenheit{value: 68.0} = result
+    end
+
+    test "returns error when adding/subtracting different unit types" do
+      result = Unit.add(%Unit.Celsius{value: 25}, %Unit.Gram{value: 1000})
+      assert {:error, "Cannot add units of different types: Elixir.Unit.Temperature and Elixir.Unit.Weight"} = result
+
+      result = Unit.subtract(%Unit.Celsius{value: 25}, %Unit.Cup{value: 1})
+      assert {:error, "Cannot subtract units of different types: Elixir.Unit.Temperature and Elixir.Unit.Volume"} = result
+    end
+  end
+
+  describe "temperature parsing" do
+    test "parses temperature units correctly using aliases" do
+      # Parse Celsius using alias
+      result = Unit.parse_temperature("25 c room temperature")
+      assert {%Unit.Celsius{value: 25.0}, "room temperature"} = result
+
+      # Parse Fahrenheit using alias
+      result = Unit.parse_temperature("72 f room temperature")
+      assert {%Unit.Fahrenheit{value: 72.0}, "room temperature"} = result
+
+      # Parse Kelvin using alias
+      result = Unit.parse_temperature("298 k room temperature")
+      assert {%Unit.Kelvin{value: 298.0}, "room temperature"} = result
+    end
+
+    test "returns error when temperature units are not recognized" do
+      result = Unit.parse_temperature("25 cel room temperature")
+      assert {:error, "25 cel room temperature"} = result
+
+      result = Unit.parse_temperature("72 fah room temperature")
+      assert {:error, "72 fah room temperature"} = result
+    end
+  end
+
   describe "to_string/1" do
     test "converts unit structs to string representation correctly" do
       # Test singular form for value 1
