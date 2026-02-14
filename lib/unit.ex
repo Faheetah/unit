@@ -31,6 +31,9 @@ defmodule Unit do
     Unit.Kelvin
   ]
 
+  @units @weight ++ @volume ++ @temperature
+
+  def parse(string), do: parse(string, @units)
   def parse_weight(string), do: parse(string, @weight)
   def parse_volume(string), do: parse(string, @volume)
   def parse_temperature(string), do: parse(string, @temperature)
@@ -71,15 +74,18 @@ defmodule Unit do
         # If not a fraction, try parsing as a float
         # First trim leading spaces
         trimmed_string = String.trim_leading(string)
-        trimmed_string
-        |> Float.parse()
-        |> parse_fragments(trimmed_string)
-        |> find_unit(string, units)
+        case Float.parse(trimmed_string) do
+          {num, rest} ->
+            find_unit({num, rest}, string, units)
+          :error ->
+            # If Float.parse fails, try to parse just the numeric part
+            parse_numeric_prefix(trimmed_string, string, units)
+        end
     end
   end
 
-  def parse_fragments(:error, string), do: parse_fraction(string)
-  def parse_fragments({num, string}, _string) do
+  defp parse_fragments(:error, string), do: parse_fraction(string)
+  defp parse_fragments({num, string}, _string) do
     case parse_fraction(string) do
       {numerator, denominator, rest} -> {num + (numerator / denominator), rest}
       {:error, rest} -> {num, String.trim_leading(rest, " ")}
@@ -87,7 +93,7 @@ defmodule Unit do
     end
   end
 
-  def parse_fraction(string) do
+  defp parse_fraction(string) do
     # Trim leading spaces and split by spaces to get the first word and the rest
     trimmed_string = String.trim_leading(string)
     words = String.split(trimmed_string, " ", parts: 2)
@@ -105,8 +111,8 @@ defmodule Unit do
     end
   end
 
-  def calculate_decimal([_], _rest, string), do: {:error, string}
-  def calculate_decimal([numerator, denominator], rest_string, string) do
+  defp calculate_decimal([_], _rest, string), do: {:error, string}
+  defp calculate_decimal([numerator, denominator], rest_string, string) do
     with {n, ""} <- Integer.parse(numerator),
          {d, ""} <- Integer.parse(denominator) do
       {n, d, rest_string}
@@ -115,21 +121,68 @@ defmodule Unit do
     end
   end
 
-  def find_unit({:error, _rest}, string, _units), do: {:error, string}
-  def find_unit({amount, rest}, string, units) do
-    [unit | rest2] = String.split(rest, " ")
-    unit = String.downcase(unit)
+  defp find_unit({:error, _rest}, string, _units), do: {:error, string}
+  defp find_unit({amount, rest}, string, units) do
+    # First try to split by whitespace
+    case String.split(String.trim_leading(rest), " ", parts: 2) do
+      [unit | rest2] ->
+        unit = String.downcase(unit)
+        module = Enum.find(units, fn u ->
+          singular = String.downcase(u.__struct__().singular)
+          plural = String.downcase(u.__struct__().plural)
+          alias_val = String.downcase(u.__struct__().alias)
+          unit in [singular, plural, alias_val]
+        end)
+
+        if module do
+          {struct(module, value: amount), Enum.join(rest2, " ")}
+        else
+          # If no match found, try to find unit directly attached to number
+          find_attached_unit({amount, rest}, string, units)
+        end
+      [] ->
+        # No spaces found, try to find unit directly attached to number
+        find_attached_unit({amount, rest}, string, units)
+    end
+  end
+
+  defp find_attached_unit({amount, rest}, string, units) do
+    # Look for units that might be directly attached to the number
     module = Enum.find(units, fn u ->
-      singular = String.downcase(u.__struct__().singular)
-      plural = String.downcase(u.__struct__().plural)
       alias_val = String.downcase(u.__struct__().alias)
-      unit in [singular, plural, alias_val]
+      String.starts_with?(String.downcase(rest), alias_val)
     end)
 
     if module do
-      {struct(module, value: amount), Enum.join(rest2, " ")}
+      alias_val = String.downcase(module.__struct__().alias)
+      rest_after_unit = String.slice(rest, String.length(alias_val)..-1)
+      rest_after_unit = String.trim_leading(rest_after_unit, " ")
+      {struct(module, value: amount), rest_after_unit}
     else
       {:error, string}
+    end
+  end
+
+  defp parse_numeric_prefix(string, original_string, units) do
+    # Try to parse just the numeric prefix
+    case parse_number_prefix(string) do
+      {num, rest} ->
+        find_attached_unit({num, rest}, original_string, units)
+      :error ->
+        {:error, original_string}
+    end
+  end
+
+  defp parse_number_prefix(string) do
+    # Try to parse an integer or float prefix
+    case Integer.parse(string) do
+      {num, rest} -> {num * 1.0, rest}
+      :error ->
+        # Try to parse as float
+        case Float.parse(string) do
+          {num, rest} -> {num, rest}
+          :error -> :error
+        end
     end
   end
 

@@ -68,6 +68,29 @@ defmodule UnitTest do
       result = Unit.parse("3 c of milk")
       assert {%Unit.Cup{value: 3.0}, "of milk"} = result
     end
+
+    test "parses numbers directly attached to units" do
+      # Test weight units with no space
+      result = Unit.parse("1kg sugar")
+      assert {%Unit.Kilogram{value: 1.0}, "sugar"} = result
+
+      result = Unit.parse("2.5g salt")
+      assert {%Unit.Gram{value: 2.5}, "salt"} = result
+
+      # Test volume units with no space
+      result = Unit.parse("1c flour")
+      assert {%Unit.Cup{value: 1.0}, "flour"} = result
+
+      result = Unit.parse("1.5ml oil")
+      assert {%Unit.Milliliter{value: 1.5}, "oil"} = result
+
+      # Test temperature units with no space
+      result = Unit.parse_temperature("100c water")
+      assert {%Unit.Celsius{value: 100.0}, "water"} = result
+
+      result = Unit.parse_temperature("32f room temperature")
+      assert {%Unit.Fahrenheit{value: 32.0}, "room temperature"} = result
+    end
   end
 
   describe "add/2" do
