@@ -3,6 +3,97 @@ defmodule Unit do
   Documentation for `Unit`.
   """
 
+  # List of all known unit modules for parsing
+  @units [
+    # Weight units
+    Unit.Gram,
+    Unit.Kilogram,
+    Unit.Milligram,
+    Unit.Ounce,
+    Unit.Pound,
+
+    # Volume units
+    Unit.Teaspoon,
+    Unit.Tablespoon,
+    Unit.Milliliter,
+    Unit.Cup,
+    Unit.Pint,
+    Unit.Quart,
+    Unit.Gallon
+  ]
+
+  @doc """
+  Parses a unit from a string. Takes the first occurrence of a unit in the string.
+  Matches against unit singular, plural, and alias forms.
+  Values can be integers, decimals, or fractions.
+  Returns a tuple with the parsed unit and the rest of the string, or :error if nothing matches.
+
+  ## Examples
+
+      iex> Unit.parse("2 cups of flour")
+      {%Unit.Cup{value: 2.0}, " of flour"}
+
+      iex> Unit.parse("1.5 kg of sugar")
+      {%Unit.Kilogram{value: 1.5}, " of sugar"}
+
+      iex> Unit.parse("3/4 teaspoon of salt")
+      {%Unit.Teaspoon{value: 0.75}, " of salt"}
+
+      iex> Unit.parse("No units here")
+      :error
+
+  """
+  def parse(string) do
+    string
+    |> Float.parse()
+    |> parse_fragments(string)
+    |> find_unit(string)
+  end
+
+  def parse_fragments(:error, string), do: parse_fraction(string)
+  def parse_fragments({num, string}, _string) do
+    case parse_fraction(string) do
+      {numerator, denominator, rest} -> {num + (numerator / denominator), rest}
+      {:error, rest} -> {num, String.trim_leading(rest, " ")}
+      x -> x
+    end
+  end
+
+  def parse_fraction(string) do
+    [first | rest] =
+      string
+      |> String.trim_leading(" ")
+      |> String.split(" ")
+
+    case calculate_decimal(String.split(first, "/"), string) do
+      {:error, _rest} -> {:error, string}
+      {n, d, _} -> {n, d, Enum.join(rest, " ")}
+    end
+  end
+
+  def calculate_decimal([_], string), do: {:error, string}
+  def calculate_decimal([numerator, denominator], string) do
+    with {n, ""} <- Integer.parse(numerator),
+         {d, ""} <- Integer.parse(denominator) do
+      {n, d, string}
+    else
+      _ -> {:error, string}
+    end
+  end
+
+  def find_unit({:error, _rest}, string), do: {:error, string}
+  def find_unit({amount, rest}, string) do
+    [unit | rest2] = String.split(rest, " ")
+    unit = String.downcase(unit)
+    module = Enum.find(@units, fn u -> unit in [u.__struct__.singular, u.__struct__.plural, u.__struct__.alias] end)
+
+    if module do
+      {struct(module, value: amount), Enum.join(rest2, " ")}
+    else
+      {:error, string}
+    end
+  end
+
   @doc """
   Adds two units of the same type together.
 
