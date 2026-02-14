@@ -169,4 +169,32 @@ defmodule Unit do
   def convert(_, _) do
     {:error, "First argument must be a unit struct with a type field"}
   end
+
+  @doc """
+  Converts a unit struct to its string representation.
+
+  ## Examples
+
+      iex> Unit.to_string(%Unit.Gram{value: 1})
+      "1 gram"
+
+      iex> Unit.to_string(%Unit.Gram{value: 2.5})
+      "2.5 grams"
+
+      iex> Unit.to_string(%Unit.Cup{value: 1})
+      "1 cup"
+
+      iex> Unit.to_string(%Unit.Cup{value: 3})
+      "3 cups"
+  """
+  def to_string(%{value: value, singular: singular, plural: plural} = _unit) do
+    unit_name = if value == 1 or value == 1.0, do: singular, else: plural
+    # Format the value to avoid unnecessary decimal places
+    formatted_value = if is_integer(value) or value == trunc(value) do
+      Integer.to_string(trunc(value))
+    else
+      :erlang.float_to_binary(value, [{:decimals, 10}, :compact])
+    end
+    "#{formatted_value} #{unit_name}"
+  end
 end

@@ -147,4 +147,39 @@ defmodule UnitTest do
       assert {:error, "First argument must be a unit struct with a type field"} = result
     end
   end
+
+  describe "to_string/1" do
+    test "converts unit structs to string representation correctly" do
+      # Test singular form for value 1
+      result = Unit.to_string(%Unit.Gram{value: 1})
+      assert "1 gram" = result
+
+      # Test singular form for value 1.0
+      result = Unit.to_string(%Unit.Gram{value: 1.0})
+      assert "1 gram" = result
+
+      # Test plural form for integer values other than 1
+      result = Unit.to_string(%Unit.Gram{value: 2})
+      assert "2 grams" = result
+
+      # Test plural form for float values
+      result = Unit.to_string(%Unit.Gram{value: 2.5})
+      assert "2.5 grams" = result
+
+      # Test with volume units
+      result = Unit.to_string(%Unit.Cup{value: 1})
+      assert "1 cup" = result
+
+      result = Unit.to_string(%Unit.Cup{value: 3})
+      assert "3 cups" = result
+
+      # Test with decimal values that have trailing zeros
+      result = Unit.to_string(%Unit.Gram{value: 1.50})
+      assert "1.5 grams" = result
+
+      # Test with larger numbers
+      result = Unit.to_string(%Unit.Kilogram{value: 10})
+      assert "10 kilograms" = result
+    end
+  end
 end
