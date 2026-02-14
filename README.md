@@ -91,6 +91,24 @@ result = Unit.convert(%Unit.Gram{value: 1000}, Unit.Cup)
 # Returns: {:error, "Cannot convert units of different types: Elixir.Unit.Weight and Elixir.Unit.Volume"}
 ```
 
+### Subtracting Units
+
+Subtract one unit from another of the same type:
+
+```elixir
+# Subtract two weight units (metric)
+result = Unit.subtract(%Unit.Kilogram{value: 1}, %Unit.Gram{value: 500})
+# Returns: %Unit.Kilogram{value: 0.5, ...}
+
+# Subtract two volume units
+result = Unit.subtract(%Unit.Cup{value: 2}, %Unit.Tablespoon{value: 16})
+# Returns: %Unit.Cup{value: 1.0, ...}
+
+# Attempting to subtract units of different types will return an error
+result = Unit.subtract(%Unit.Gram{value: 1000}, %Unit.Cup{value: 1})
+# Returns: {:error, "Cannot subtract units of different types: Elixir.Unit.Weight and Elixir.Unit.Volume"}
+```
+
 ### Parsing Units from Strings
 
 Parse a unit from a string representation:

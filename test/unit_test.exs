@@ -105,6 +105,41 @@ defmodule UnitTest do
     end
   end
 
+  describe "subtract/2" do
+    test "subtracts two weight units of the same type correctly" do
+      result = Unit.subtract(%Unit.Kilogram{value: 1}, %Unit.Gram{value: 500})
+      assert %Unit.Kilogram{value: 0.5} = result
+      assert result.singular == "kilogram"
+      assert result.plural == "kilograms"
+      assert result.alias == "kg"
+      assert result.type == Unit.Weight
+      assert result.mg == 1000000.0
+    end
+
+    test "subtracts two volume units of the same type correctly" do
+      result = Unit.subtract(%Unit.Cup{value: 2}, %Unit.Tablespoon{value: 16})
+      assert %Unit.Cup{value: 1.0} = result
+      assert result.singular == "cup"
+      assert result.plural == "cups"
+      assert result.alias == "c"
+      assert result.type == Unit.Volume
+      assert result.ml == 236.5882365
+    end
+
+    test "returns error when subtracting units of different types" do
+      result = Unit.subtract(%Unit.Gram{value: 1000}, %Unit.Cup{value: 1})
+      assert {:error, "Cannot subtract units of different types: Elixir.Unit.Weight and Elixir.Unit.Volume"} = result
+    end
+
+    test "returns error when arguments are not unit structs" do
+      result = Unit.subtract("not a unit", %Unit.Gram{value: 1000})
+      assert {:error, "Both arguments must be unit structs with a type field"} = result
+
+      result = Unit.subtract(%Unit.Gram{value: 1000}, "not a unit")
+      assert {:error, "Both arguments must be unit structs with a type field"} = result
+    end
+  end
+
   describe "convert/2" do
     test "converts weight units correctly" do
       result = Unit.convert(%Unit.Gram{value: 1000}, Unit.Kilogram)

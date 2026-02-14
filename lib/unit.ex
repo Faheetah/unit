@@ -143,6 +143,33 @@ defmodule Unit do
   end
 
   @doc """
+  Subtracts one unit from another unit of the same type.
+
+  ## Examples
+
+      iex> Unit.subtract(%Unit.Kilogram{value: 1}, %Unit.Gram{value: 500})
+      %Unit.Kilogram{value: 0.5, singular: "kilogram", plural: "kilograms", alias: "kg", type: Unit.Weight, mg: 1000000.0}
+
+      iex> Unit.subtract(%Unit.Cup{value: 2}, %Unit.Tablespoon{value: 16})
+      %Unit.Cup{value: 1.0, singular: "cup", plural: "cups", alias: "c", type: Unit.Volume, ml: 236.5882365}
+
+      iex> Unit.subtract(%Unit.Gram{value: 1000}, %Unit.Cup{value: 1})
+      {:error, "Cannot subtract units of different types: Elixir.Unit.Weight and Elixir.Unit.Volume"}
+
+  """
+  def subtract(%{type: type1} = left, %{type: type2} = right) when type1 == type2 do
+    type1.subtract(left, right)
+  end
+
+  def subtract(%{type: type1}, %{type: type2}) do
+    {:error, "Cannot subtract units of different types: #{type1} and #{type2}"}
+  end
+
+  def subtract(_, _) do
+    {:error, "Both arguments must be unit structs with a type field"}
+  end
+
+  @doc """
   Converts a unit to another unit of the same type.
 
   ## Examples
