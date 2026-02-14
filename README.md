@@ -91,6 +91,49 @@ result = Unit.convert(%Unit.Gram{value: 1000}, Unit.Cup)
 # Returns: {:error, "Cannot convert units of different types: Elixir.Unit.Weight and Elixir.Unit.Volume"}
 ```
 
+### Parsing Units from Strings
+
+Parse a unit from a string representation:
+
+```elixir
+# Parse integer values with units
+result = Unit.parse("2 cups of flour")
+# Returns: {%Unit.Cup{value: 2.0}, "of flour"}
+
+# Parse decimal values with units
+result = Unit.parse("1.5 kg of sugar")
+# Returns: {%Unit.Kilogram{value: 1.5}, "of sugar"}
+
+# Parse fraction values with units
+result = Unit.parse("3/4 teaspoon of salt")
+# Returns: {%Unit.Teaspoon{value: 0.75}, "of salt"}
+
+# Handle cases with no units found
+result = Unit.parse("No units here")
+# Returns: {:error, "No units here"}
+```
+
+### Converting Units to Strings
+
+Convert a unit to its string representation:
+
+```elixir
+# Convert a unit with value 1 to string (singular form)
+result = Unit.to_string(%Unit.Gram{value: 1})
+# Returns: "1 gram"
+
+# Convert a unit with value > 1 to string (plural form)
+result = Unit.to_string(%Unit.Gram{value: 2.5})
+# Returns: "2.5 grams"
+
+# Works with all unit types
+result = Unit.to_string(%Unit.Cup{value: 1})
+# Returns: "1 cup"
+
+result = Unit.to_string(%Unit.Cup{value: 3})
+# Returns: "3 cups"
+```
+
 ## Available Measurements
 
 ### Volume Units
