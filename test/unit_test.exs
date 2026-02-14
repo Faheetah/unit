@@ -2,6 +2,74 @@ defmodule UnitTest do
   use ExUnit.Case
   doctest Unit
 
+  describe "parse/1" do
+    test "parses integer values with units correctly" do
+      result = Unit.parse("2 cups of flour")
+      assert {%Unit.Cup{value: 2.0}, "of flour"} = result
+      assert %Unit.Cup{value: 2.0, singular: "cup", plural: "cups", alias: "c"} = result |> elem(0)
+
+      result = Unit.parse("5 kg of sugar")
+      assert {%Unit.Kilogram{value: 5.0}, "of sugar"} = result
+      assert %Unit.Kilogram{value: 5.0, singular: "kilogram", plural: "kilograms", alias: "kg"} = result |> elem(0)
+    end
+
+    test "parses decimal values with units correctly" do
+      result = Unit.parse("1.5 kg of sugar")
+      assert {%Unit.Kilogram{value: 1.5}, "of sugar"} = result
+      assert %Unit.Kilogram{value: 1.5, singular: "kilogram", plural: "kilograms", alias: "kg"} = result |> elem(0)
+
+      result = Unit.parse("0.75 cups of milk")
+      assert {%Unit.Cup{value: 0.75}, "of milk"} = result
+      assert %Unit.Cup{value: 0.75, singular: "cup", plural: "cups", alias: "c"} = result |> elem(0)
+    end
+
+    test "parses fraction values with units correctly" do
+      result = Unit.parse("3/4 teaspoon of salt")
+      assert {%Unit.Teaspoon{value: 0.75}, "of salt"} = result
+      assert %Unit.Teaspoon{value: 0.75, singular: "teaspoon", plural: "teaspoons", alias: "tsp"} = result |> elem(0)
+
+      result = Unit.parse("1/2 cup of butter")
+      assert {%Unit.Cup{value: 0.5}, "of butter"} = result
+      assert %Unit.Cup{value: 0.5, singular: "cup", plural: "cups", alias: "c"} = result |> elem(0)
+    end
+
+    test "returns error when no units are found" do
+      result = Unit.parse("No units here")
+      assert {:error, "No units here"} = result
+
+      result = Unit.parse("")
+      assert {:error, ""} = result
+
+      result = Unit.parse("Just a random string")
+      assert {:error, "Just a random string"} = result
+    end
+
+    test "returns error when units are not recognized" do
+      result = Unit.parse("2 unknownunits of something")
+      assert {:error, "2 unknownunits of something"} = result
+
+      result = Unit.parse("5 xyz of something")
+      assert {:error, "5 xyz of something"} = result
+    end
+
+    test "handles edge cases correctly" do
+      # Test with extra spaces
+      result = Unit.parse("  2   cups   of flour  ")
+      assert {%Unit.Cup{value: 2.0}, "  of flour  "} = result
+
+      # Test mixed case units
+      result = Unit.parse("2 CUPS of flour")
+      assert {%Unit.Cup{value: 2.0}, "of flour"} = result
+
+      # Test unit aliases
+      result = Unit.parse("2 kg of sugar")
+      assert {%Unit.Kilogram{value: 2.0}, "of sugar"} = result
+
+      result = Unit.parse("3 c of milk")
+      assert {%Unit.Cup{value: 3.0}, "of milk"} = result
+    end
+  end
+
   describe "add/2" do
     test "adds two weight units of the same type correctly" do
       result = Unit.add(%Unit.Gram{value: 1000}, %Unit.Kilogram{value: 1})

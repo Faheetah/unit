@@ -26,28 +26,43 @@ defmodule Unit do
   Parses a unit from a string. Takes the first occurrence of a unit in the string.
   Matches against unit singular, plural, and alias forms.
   Values can be integers, decimals, or fractions.
-  Returns a tuple with the parsed unit and the rest of the string, or :error if nothing matches.
+  Returns a tuple with the parsed unit and the rest of the string, or {:error, string} if nothing matches.
 
   ## Examples
 
       iex> Unit.parse("2 cups of flour")
-      {%Unit.Cup{value: 2.0}, " of flour"}
+      {%Unit.Cup{value: 2.0}, "of flour"}
 
       iex> Unit.parse("1.5 kg of sugar")
-      {%Unit.Kilogram{value: 1.5}, " of sugar"}
+      {%Unit.Kilogram{value: 1.5}, "of sugar"}
 
       iex> Unit.parse("3/4 teaspoon of salt")
-      {%Unit.Teaspoon{value: 0.75}, " of salt"}
+      {%Unit.Teaspoon{value: 0.75}, "of salt"}
+
+      iex> Unit.parse("1 notfound here")
+      {:error, "1 notfound here"}
+
+      iex> Unit.parse("3/4 notfound here")
+      {:error, "3/4 notfound here"}
 
       iex> Unit.parse("No units here")
-      :error
+      {:error, "No units here"}
 
   """
   def parse(string) do
-    string
-    |> Float.parse()
-    |> parse_fragments(string)
-    |> find_unit(string)
+    # Try to parse as a fraction first
+    case parse_fraction(string) do
+      {numerator, denominator, rest} ->
+        find_unit({(numerator / denominator), rest}, string)
+      _ ->
+        # If not a fraction, try parsing as a float
+        # First trim leading spaces
+        trimmed_string = String.trim_leading(string)
+        trimmed_string
+        |> Float.parse()
+        |> parse_fragments(trimmed_string)
+        |> find_unit(string)
+    end
   end
 
   def parse_fragments(:error, string), do: parse_fraction(string)
@@ -60,22 +75,28 @@ defmodule Unit do
   end
 
   def parse_fraction(string) do
-    [first | rest] =
-      string
-      |> String.trim_leading(" ")
-      |> String.split(" ")
+    # Trim leading spaces and split by spaces to get the first word and the rest
+    trimmed_string = String.trim_leading(string)
+    words = String.split(trimmed_string, " ", parts: 2)
 
-    case calculate_decimal(String.split(first, "/"), string) do
-      {:error, _rest} -> {:error, string}
-      {n, d, _} -> {n, d, Enum.join(rest, " ")}
+    case words do
+      [] -> {:error, string}
+      [first] ->
+        # Split the first word by "/" to check if it's a fraction
+        parts = String.split(first, "/")
+        calculate_decimal(parts, "", string)
+      [first | [rest]] ->
+        # Split the first word by "/" to check if it's a fraction
+        parts = String.split(first, "/")
+        calculate_decimal(parts, rest, string)
     end
   end
 
-  def calculate_decimal([_], string), do: {:error, string}
-  def calculate_decimal([numerator, denominator], string) do
+  def calculate_decimal([_], _rest, string), do: {:error, string}
+  def calculate_decimal([numerator, denominator], rest_string, string) do
     with {n, ""} <- Integer.parse(numerator),
          {d, ""} <- Integer.parse(denominator) do
-      {n, d, string}
+      {n, d, rest_string}
     else
       _ -> {:error, string}
     end
@@ -85,7 +106,7 @@ defmodule Unit do
   def find_unit({amount, rest}, string) do
     [unit | rest2] = String.split(rest, " ")
     unit = String.downcase(unit)
-    module = Enum.find(@units, fn u -> unit in [u.__struct__.singular, u.__struct__.plural, u.__struct__.alias] end)
+    module = Enum.find(@units, fn u -> unit in [u.__struct__().singular, u.__struct__().plural, u.__struct__().alias] end)
 
     if module do
       {struct(module, value: amount), Enum.join(rest2, " ")}
