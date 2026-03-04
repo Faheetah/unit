@@ -84,15 +84,6 @@ defmodule Unit do
     end
   end
 
-  defp parse_fragments(:error, string), do: parse_fraction(string)
-  defp parse_fragments({num, string}, _string) do
-    case parse_fraction(string) do
-      {numerator, denominator, rest} -> {num + (numerator / denominator), rest}
-      {:error, rest} -> {num, String.trim_leading(rest, " ")}
-      x -> x
-    end
-  end
-
   defp parse_fraction(string) do
     # Trim leading spaces and split by spaces to get the first word and the rest
     trimmed_string = String.trim_leading(string)
