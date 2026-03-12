@@ -1,12 +1,14 @@
 # Unit
 
-A library for working with measurements in Elixir, supporting unit conversion and arithmetic operations.
+A library for working with measurements in Elixir, supporting unit conversion, arithmetic operations, and string parsing.
 
 ## Features
 
-- Support for multiple measurement types (volume, weight)
+- Support for multiple measurement types (volume, weight, temperature)
 - Unit conversion between different units of the same type
 - Arithmetic operations (addition, subtraction) between units of the same type
+- String parsing for all unit types
+- Type-specific parsing functions for more precise control
 - Error handling for incompatible unit operations
 
 ## Installation
@@ -142,6 +144,22 @@ result = Unit.parse("3/4 teaspoon of salt")
 # Handle cases with no units found
 result = Unit.parse("No units here")
 # Returns: {:error, "No units here"}
+```
+
+Each measurement type module also provides its own parsing function for more specific parsing:
+
+```elixir
+# Parse temperature units specifically
+result = Unit.Temperature.parse("25 celsius room temperature")
+# Returns: {%Unit.Celsius{value: 25.0}, "room temperature"}
+
+# Parse volume units specifically
+result = Unit.Volume.parse("2 cups of flour")
+# Returns: {%Unit.Cup{value: 2.0}, "of flour"}
+
+# Parse weight units specifically
+result = Unit.Weight.parse("1.5 kg of sugar")
+# Returns: {%Unit.Kilogram{value: 1.5}, "of sugar"}
 ```
 
 ### Converting Units to Strings

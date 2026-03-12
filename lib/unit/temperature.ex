@@ -1,4 +1,11 @@
 defmodule Unit.Temperature do
+  @moduledoc """
+  Functions for working with temperature units.
+
+  This module provides functions for converting between temperature units
+  (Celsius, Fahrenheit, and) and parsing temperature values from strings.
+  """
+
   # List of all temperature unit modules
   @units [
     Unit.Celsius,
@@ -15,14 +22,74 @@ defmodule Unit.Temperature do
                               |> Map.put(struct_info.alias, module)
                             end)
 
+  @doc """
+  Converts a string to a temperature unit module.
+
+  Returns `{:ok, module}` if the string matches a known temperature unit,
+  or `:error` if no match is found.
+
+  ## Examples
+
+      iex> Unit.Temperature.from_string("celsius")
+      {:ok, Unit.Celsius}
+
+      iex> Unit.Temperature.from_string("f")
+      {:ok, Unit.Fahrenheit}
+
+      iex> Unit.Temperature.from_string("kelvin")
+      {:ok, Unit.Kelvin}
+
+      iex> Unit.Temperature.from_string("unknown")
+      :error
+
+  """
   def from_string(string) do
     Map.fetch(@string_to_module_mapping, string)
   end
 
+  @doc """
+  Converts a string to a temperature unit module.
+
+  Returns the module if the string matches a known temperature unit,
+  or raises a KeyError if no match is found.
+
+  ## Examples
+
+      iex> Unit.Temperature.from_string!("celsius")
+      Unit.Celsius
+
+      iex> Unit.Temperature.from_string!("k")
+      Unit.Kelvin
+
+      iex> Unit.Temperature.from_string!("fahrenheit")
+      Unit.Fahrenheit
+
+  """
   def from_string!(string) do
     Map.fetch!(@string_to_module_mapping, string)
   end
 
+  @doc """
+  Parses a temperature value from a string.
+
+  Returns a tuple with the parsed unit and the rest of the string,
+  or `{:error, string}` if no temperature unit is found.
+
+  ## Examples
+
+      iex> Unit.Temperature.parse("25 celsius room temperature")
+      {%Unit.Celsius{value: 25.0}, "room temperature"}
+
+      iex> Unit.Temperature.parse("98.6 fahrenheit body temperature")
+      {%Unit.Fahrenheit{value: 98.6}, "body temperature"}
+
+      iex> Unit.Temperature.parse("273.15 kelvin absolute zero")
+      {%Unit.Kelvin{value: 273.15}, "absolute zero"}
+
+      iex> Unit.Temperature.parse("No temperature here")
+      {:error, "No temperature here"}
+
+  """
   def parse(string) do
     Unit.Parser.parse(string, @units)
   end

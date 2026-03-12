@@ -1,6 +1,28 @@
 defmodule Unit do
   @moduledoc """
-  Documentation for `Unit`.
+  Main module for working with units of measurement.
+
+  This module provides functions for parsing unit strings, converting between
+  units, and performing arithmetic operations on units. Units are organized
+  by type: Temperature, Volume, and Weight.
+
+  ## Examples
+
+      iex> Unit.parse("2 cups of flour")
+      {%Unit.Cup{value: 2.0}, "of flour"}
+
+      iex> Unit.parse("1.5 kg of sugar")
+      {%Unit.Kilogram{value: 1.5}, "of sugar"}
+
+      iex> Unit.parse("25 celsius room temperature")
+      {%Unit.Celsius{value: 25.0}, "room temperature"}
+
+      iex> Unit.add(%Unit.Gram{value: 1000}, %Unit.Kilogram{value: 1})
+      %Unit.Gram{value: 2000.0, singular: "gram", plural: "grams", alias: "g", type: Unit.Weight, mg: 1000.0}
+
+      iex> Unit.convert(%Unit.Cup{value: 1}, Unit.Tablespoon)
+      %Unit.Tablespoon{value: 16.0, singular: "tablespoon", plural: "tablespoons", alias: "tbsp", type: Unit.Volume, ml: 14.78676484375}
+
   """
 
   # List of all known unit modules for parsing
@@ -33,9 +55,54 @@ defmodule Unit do
 
   @units @weight ++ @volume ++ @temperature
 
+  @doc """
+  Parses a unit from a string, detecting the unit type automatically.
+
+  ## Examples
+
+      iex> Unit.parse("2 cups of flour")
+      {%Unit.Cup{value: 2.0}, "of flour"}
+
+      iex> Unit.parse("1.5 kg of sugar")
+      {%Unit.Kilogram{value: 1.5}, "of sugar"}
+
+      iex> Unit.parse("25 celsius room temperature")
+      {%Unit.Celsius{value: 25.0}, "room temperature"}
+
+  """
   def parse(string), do: Unit.Parser.parse(string, @units)
+
+  @doc """
+  Parses a weight unit from a string.
+
+  ## Examples
+
+      iex> Unit.parse_weight("2 kg of sugar")
+      {%Unit.Kilogram{value: 2.0}, "of sugar"}
+
+  """
   def parse_weight(string), do: Unit.Parser.parse(string, @weight)
+
+  @doc """
+  Parses a volume unit from a string.
+
+  ## Examples
+
+      iex> Unit.parse_volume("2 cups of flour")
+      {%Unit.Cup{value: 2.0}, "of flour"}
+
+  """
   def parse_volume(string), do: Unit.Parser.parse(string, @volume)
+
+  @doc """
+  Parses a temperature unit from a string.
+
+  ## Examples
+
+      iex> Unit.parse_temperature("25 celsius room temperature")
+      {%Unit.Celsius{value: 25.0}, "room temperature"}
+
+  """
   def parse_temperature(string), do: Unit.Parser.parse(string, @temperature)
 
   @doc """

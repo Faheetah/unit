@@ -1,6 +1,10 @@
 defmodule Unit.Parser do
   @moduledoc """
   Shared parsing functionality for unit modules.
+
+  This module provides the core parsing logic used by all unit types to convert
+  strings into unit structs. It handles parsing of numeric values (integers,
+  decimals, and fractions) followed by unit identifiers.
   """
 
   @doc """
@@ -8,6 +12,21 @@ defmodule Unit.Parser do
   Matches against unit singular, plural, and alias forms.
   Values can be integers, decimals, or fractions.
   Returns a tuple with the parsed unit and the rest of the string, or {:error, string} if nothing matches.
+
+  ## Examples
+
+      iex> Unit.Parser.parse("2 cups of flour", [Unit.Cup])
+      {%Unit.Cup{value: 2.0}, "of flour"}
+
+      iex> Unit.Parser.parse("1.5 kg of sugar", [Unit.Kilogram])
+      {%Unit.Kilogram{value: 1.5}, "of sugar"}
+
+      iex> Unit.Parser.parse("3/4 teaspoon of salt", [Unit.Teaspoon])
+      {%Unit.Teaspoon{value: 0.75}, "of salt"}
+
+      iex> Unit.Parser.parse("No units here", [Unit.Gram])
+      {:error, "No units here"}
+
   """
   def parse(string, units) do
     # Try to parse as a fraction first
