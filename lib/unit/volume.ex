@@ -3,7 +3,7 @@ defmodule Unit.Volume do
   Functions for working with volume units.
 
   This module provides functions for converting between volume units
-  (Teaspoon, Tablespoon, Milliliter, Cup, Pint, Quart, Gallon) and parsing
+  (Teaspoon, Tablespoon, Milliliter, Liter, Cup, Pint, Quart, Gallon) and parsing
   volume values from strings.
   """
 
@@ -12,6 +12,7 @@ defmodule Unit.Volume do
     Unit.Teaspoon,
     Unit.Tablespoon,
     Unit.Milliliter,
+    Unit.Liter,
     Unit.Cup,
     Unit.Pint,
     Unit.Quart,
