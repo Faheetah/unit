@@ -40,6 +40,7 @@ defmodule Unit do
     Unit.Teaspoon,
     Unit.Tablespoon,
     Unit.Milliliter,
+    Unit.Liter,
     Unit.Cup,
     Unit.Pint,
     Unit.Quart,
@@ -70,7 +71,9 @@ defmodule Unit do
       {%Unit.Celsius{value: 25.0}, "room temperature"}
 
   """
-  def parse(string), do: Unit.Parser.parse(string, @units)
+  def parse(string) do
+    Unit.Parser.parse(string, @units)
+  end
 
   @doc """
   Parses a weight unit from a string.

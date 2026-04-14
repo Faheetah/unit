@@ -3,15 +3,15 @@ defmodule UnitTest do
   doctest Unit
 
   describe "parse/1" do
-    test "parses integer values with units correctly" do
-      result = Unit.parse("2 cups of flour")
-      assert {%Unit.Cup{value: 2.0}, "of flour"} = result
-      assert %Unit.Cup{value: 2.0, singular: "cup", plural: "cups", alias: "c"} = result |> elem(0)
+  test "parses integer values with units correctly" do
+    result = Unit.parse("2 cups of flour")
+    assert {%Unit.Cup{value: 2.0}, "of flour"} = result
+    assert %Unit.Cup{value: 2.0, singular: "cup", plural: "cups", alias: "c"} = result |> elem(0)
 
-      result = Unit.parse("5 kg of sugar")
-      assert {%Unit.Kilogram{value: 5.0}, "of sugar"} = result
-      assert %Unit.Kilogram{value: 5.0, singular: "kilogram", plural: "kilograms", alias: "kg"} = result |> elem(0)
-    end
+    result = Unit.parse("5 kg of sugar")
+    assert {%Unit.Kilogram{value: 5.0}, "of sugar"} = result
+    assert %Unit.Kilogram{value: 5.0, singular: "kilogram", plural: "kilograms", alias: "kg"} = result |> elem(0)
+  end
 
     test "parses decimal values with units correctly" do
       result = Unit.parse("1.5 kg of sugar")
